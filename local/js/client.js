@@ -1,7 +1,8 @@
+
 // Client side manipulation
-
 $(document).ready(()=>{
-
+    var isVoteReady = false;
+    var voter = null;
     // Rendering
     renderCandidates(initializeCandidates());
 
@@ -13,25 +14,73 @@ $(document).ready(()=>{
                 console.log("Voting period is over...");
             }
         },
-        5000
+        20000
     );
 
     // Events
 
+    // Vote candidate button
+    $("#candidates").on("click", ".vote-btn", function(){
+        let c_id = $(this).data("candidate");
+        let c = $(this).parent().children(".vote-name").text();
+
+        let conf = confirm(`Are you sure you want to vote ${c}?`)
+
+        if(conf){
+            sendVote(voter, c_id);
+            voter = null;
+            isVoteReady = false;
+        }
+    })
 
     // Check user
     $('#chk-user-btn').on('click',function(){
 
-        let eid = $("#eid-txt").val();
+        if(!isVoteReady){
+            let eid = $("#eid-txt").val();
+            eid = eid.toLocaleLowerCase();
+            renderVoter(eid).then((data)=>{
+                isVoteReady = data;
 
-        renderVoter(eid);
+                voter = isVoteReady ? eid : null;
+
+                if(voter){
+                    console.log(`${voter} is ready to vote...`);
+                }
+            })
+            .catch((err)=>{
+                console.log(err);
+            });
+        }
     });
+
+    $('#eid-txt').on('keypress', function (e) {
+        if(!isVoteReady && e.keyCode == 13){
+            let eid = $("#eid-txt").val();
+
+            eid = eid.toLocaleLowerCase();
+
+            renderVoter(eid).then((data)=>{
+                isVoteReady = data;
+
+                voter = isVoteReady ? eid : null;
+
+                if(voter){
+                    console.log(`${voter} is ready to vote...`);
+                }
+            })
+            .catch((err)=>{
+                console.log(err);
+            });
+        }
+  });
 
     // Clear user input
     $('#clr-user-btn').on('click',function(){
 
-        $("#eid-txt").val("");
-        $("#eid-form error").addClass("hidden-log");
+        clearRender();
+        isVoteReady = false;
+        voter = null;
     })
 });
 
@@ -40,20 +89,52 @@ $(document).ready(()=>{
 // | RENDERERS            | //
 //  ======================  //
 
+// Clears render
+function clearRender(){
+
+    $("#eid-txt").removeAttr("disabled");
+    $("#chk-user-btn").removeAttr("disabled");
+    $("#eid-txt").val("");
+    $("#eid-form .error").addClass("hidden-log");
+    $("#candidates").addClass("hidden-log")
+}
+
 // Renders any UI changes associated with eid input
 function renderVoter(eid){
-    verifyEID(eid).then(function(data){
+    return verifyEID(eid).then(function(data){
 
-        if(data){
+        if(data == "hasvoted"){
+            alert("Employee ID has been used in voting.");
+            $("#eid-form .error img").attr("title","Employee ID has been used in voting.");
+            $("#eid-form .error").removeClass("hidden-log");
+            $("#candidates").addClass("hidden-log")
+            return false;
+        }
+        else if(data == "notregistered"){
+            alert("Employee ID is not in list of registered voters.");
+            $("#eid-form .error img").attr("title","Employee ID is not in list of registered voters.");
+            $("#eid-form .error").removeClass("hidden-log");
+            $("#candidates").addClass("hidden-log")
+            return false;
+        }
+        else if(data){
             $("#eid-form .error").addClass("hidden-log");
             $("#eid-txt").val(getFullName(data));
+            $("#eid-txt").attr("disabled","disabled");
+            $("#chk-user-btn").attr("disabled","disabled");
+
+            $("#candidates").removeClass("hidden-log")
+            return true;
         }
         else{
             $("#eid-form .error").removeClass("hidden-log");
+            $("#candidates").addClass("hidden-log")
+            return false;
         }
     })
     .catch((err)=>{
         console.log(err);
+        return false;
     })
 }
 
@@ -99,6 +180,18 @@ function enableVoting(is_voting_time){
 
 }
 
+//  ======================  //
+// | POST                 | //
+//  ======================  //
+
+// Send vote
+function sendVote(voter, candidate_id){
+    $.post(`/submit/vote`,{ eid:voter, c_id:candidate_id })
+    .done(clearRender())
+    .fail((err)=>{
+        console.log(err);
+    })
+}
 
 //  ======================  //
 // | GET                  | //
@@ -119,6 +212,8 @@ function verifyEID(eid){
     
     return user;
 }
+
+
 
 // Gets all the Candidates available in the web server
 function initializeCandidates(){
