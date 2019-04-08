@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Voting Page
+        </title>
+
+        <!--Dynamically Loaded CSS file-->
+        <link rel="stylesheet" type="text/css" href="local/css/default.css"/>
+
+        <script type="text/javascript" src='local/js/jquery-3.3.1.min.js'></script>
+        <script type="text/javascript" src='local/js/html-element-generator.js'></script>
+        <script type="text/javascript" src='local/js/client.js'></script>
+    </head>
+    <body>
+        <!-- Header -->
+        <div id="acn-header">
+            <img src="local/imgs/accenture_logo.svg"/>
+        </div>
+        <!-- Employee ID -->
+        <div id="eid-form">
+            <span>
+                <span class="error hidden-log">
+                    <img src="local/imgs/user-err.svg" />
+                </span>
+                <input id='eid-txt' type="text" placeholder="Provide your EID to vote..."/>
+                <span class='txt-btn'>
+                    <img id='chk-user-btn' src="local/imgs/user_check.svg"/>
+                </span>
+                <span class="txt-btn">
+                    <img id='clr-user-btn' src="local/imgs/user_clear.svg"/>
+                </span>
+            </span>
+        </div>
+        <!-- Candidates -->
+        <div id="candidates">
+            <div class="vote-candidates" data-candidate="1">
+                <div class="vote-img"><img src="local/imgs/default.jpg" class="candidate-pic"/></div>
+                <div class="vote-name">John Doe</div>
+                <div class="vote-btn">Vote!</div>
+            </div>
+        </div>
+        
+    </body>
+</html>
