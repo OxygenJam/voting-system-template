@@ -49,6 +49,26 @@ exports.isRegristeredVoter = function(user){
         });
 }
 
+exports.hasAlreadyVoted = function(user){
+    let pool = new Pool();
+
+    return pool.connect()
+        .then((client) =>{
+            // console.log(`SELECT * FROM ${schema}.t_votes where eid= ${user}`)
+            return client.query(`SELECT * FROM ${schema}.t_votes where eid= $1`, [user])
+                .then((res) =>{
+                    client.release();
+                    return res.rows;
+                })
+                .catch((err) =>{
+                    client.release();
+                    throw(err);
+                });
+        })
+        .catch((err)=>{
+            throw(err);
+        });
+}
 exports.getVoteCount = function(){
 
     let pool = new Pool();
@@ -59,6 +79,28 @@ exports.getVoteCount = function(){
                 .then((res) =>{
                     client.release();
                     return res.rows;
+                })
+                .catch((err) =>{
+                    client.release();
+                    throw(err);
+                });
+        })
+        .catch((err)=>{
+            throw(err);
+        });
+}
+
+exports.submitVote = function(eid, vote){
+
+    let pool = new Pool();
+
+    return pool.connect()
+        .then((client) =>{
+            // console.log(`INSERT INTO ${schema}.t_votes VALUES('${eid}',${vote})`);
+            return client.query(`INSERT INTO ${schema}.t_votes VALUES('${eid}',${vote})`)
+                .then((res) =>{
+                    client.release();
+                    return "Vote counted";
                 })
                 .catch((err) =>{
                     client.release();

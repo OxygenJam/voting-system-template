@@ -35,7 +35,7 @@
  // In case you forget when modifying this, months are index-based
  const voting_timespan = {
     start:new Date(2019,3,5,17,0,0),
-    end:new Date(2019,3,5,17,25,0)
+    end:new Date(2019,11,5,17,25,0)
  }
 
 // ================ //
@@ -45,6 +45,28 @@
 app.use('/local', express.static('local'));
 app.use(bodyParser.urlencoded({extended : false}));
 app.use(bodyParser.json());
+
+
+// ================ //
+// | POST          |//
+// ================ //
+
+// Submit vote
+app.post('/submit/vote',(req,res)=>{
+    let eid = req.body.eid;
+    let c_id = req.body.c_id;
+
+    vote = db.submitVote(eid,c_id);
+
+    vote.then((data)=>{
+        pp.logPrint(data);
+
+    })
+    .catch((err)=>{
+        pp.errPrint(err);
+    })
+})
+
 
 // ================ //
 // | GET          | //
@@ -76,26 +98,69 @@ app.get('/get/candidates',(req,res)=>{
     
 });
 
+
 // VOTERS LIST
-app.get('/get/isvoter',(req,res)=>{
+app.get('/get/isvoter', async (req,res)=>{
     let user = req.query.eid;
 
     pp.logPrint(`Checking if eid "${user}" is in the list of registered voters from DB...`);
 
-    isVoter = db.isRegristeredVoter(user);
+    let isVoter = db.isRegristeredVoter(user);
 
-    isVoter.then((data)=>{
+    let isRegistered = false, hasVoted = true ;
 
-        //console.log(data);
-        let isRegistered  = data ? true : false
+    let tosend = null;
+
+    let voter = await isVoter.then((data)=>{
+
+        // console.log(data);
         data = data ? data[0]: null
+
+        isRegistered  = data ? true : false
         pp.logPrint(`${user} is voter? ${isRegistered}`);
 
-        res.send(data);
+        return data;
     })
     .catch((err)=>{
         pp.errPrint(err);
+        res.end(err);
     })
+
+    if(!isRegistered){
+
+        tosend = "notregistered";
+    }
+    else{
+
+        await db.hasAlreadyVoted(user).then((data)=>{
+
+            // console.log(data);
+    
+            data = data.length > 0 ? true : false
+            pp.logPrint(`${user} has voted? ${data}`);
+    
+            if(!data){
+                hasVoted = false;
+            }
+            
+        })
+        .catch((err)=>{
+            pp.errPrint(err);
+            res.end(err);
+        })
+    
+        if(hasVoted){
+            tosend = "hasvoted";
+        }
+    }
+
+    if(isRegistered && !hasVoted){
+        pp.logPrint(`Sending information of eid ${user}`);
+        tosend = voter;
+    }
+
+    res.send(tosend);
+
 })
 
 // VOTE COUNT

@@ -20,19 +20,19 @@
         <div id="eid-form">
             <span>
                 <span class="error hidden-log">
-                    <img src="local/imgs/user-err.svg" />
+                    <img src="local/imgs/user-err.svg" title="EID typed was not found in registered list of voters..."/>
                 </span>
                 <input id='eid-txt' type="text" placeholder="Provide your EID to vote..."/>
                 <span class='txt-btn'>
                     <img id='chk-user-btn' src="local/imgs/user_check.svg"/>
                 </span>
                 <span class="txt-btn">
-                    <img id='clr-user-btn' src="local/imgs/user_clear.svg"/>
+                    <img id='clr-user-btn'src="local/imgs/user_clear.svg"/>
                 </span>
             </span>
         </div>
         <!-- Candidates -->
-        <div id="candidates">
+        <div id="candidates" class="hidden-log">
             <div class="vote-candidates" data-candidate="1">
                 <div class="vote-img"><img src="local/imgs/default.jpg" class="candidate-pic"/></div>
                 <div class="vote-name">John Doe</div>
