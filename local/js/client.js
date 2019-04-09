@@ -246,17 +246,3 @@ function isItVotingTime(){
 
     return is_vote;
 }
-
-//  ======================  //
-// | HELPER               | //
-//  ======================  //
-
-function getFullName(row){
-    let { f_name, m_name, l_name} = row;
-
-    m_name = m_name[0];
-
-    let fullname = `${l_name}, ${f_name} ${m_name}.`;
-
-    return fullname;
-}
