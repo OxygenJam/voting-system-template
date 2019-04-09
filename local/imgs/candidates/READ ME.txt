@@ -1,0 +1,2 @@
+pics should be in .jpg format and filname 
+must correspond to their candidate id
