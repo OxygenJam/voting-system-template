@@ -12,3 +12,42 @@ function generateDivElemForCandidate(candidate){
     </div>
     `;
 }
+
+//Tally Candidates
+function generateDivElemForResults(candidate, total_votes){
+    let { c_id, votes } = candidate;
+
+    c_id = c_id == -1 ? "unknown" : c_id;
+
+    console.log(total_votes);
+
+    let name = getFullName(candidate);
+
+    let width = Math.floor((votes/total_votes)*100);
+
+    return `
+    <div class="vote-tally-candidates">
+        <div class="vote-img"><img src="local/imgs/candidates/${c_id}.jpg" class="candidate-pic"/></div>
+        <div class="vote-candidates-detail">
+            <div class="vote-candidates-name">
+                ${name}
+            </div>
+            <div class="vote-meter" style="width:${width}%">${votes} Votes</div>
+        </div>   
+    </div>
+    `;
+}
+
+//  ======================  //
+// | HELPER               | //
+//  ======================  //
+
+function getFullName(row){
+    let { f_name, m_name, l_name} = row;
+
+    m_name = m_name[0];
+
+    let fullname = `${l_name}, ${f_name} ${m_name}.`;
+
+    return fullname;
+}

@@ -55,7 +55,9 @@ exports.getVoteCount = function(){
 
     return pool.connect()
         .then((client) =>{
-            return client.query(`SELECT vote_id, COUNT(vote_id) FROM ${schema}.t_votes GROUP BY vote_id ORDER BY COUNT(vote_id) DESC`)
+            return client.query(`SELECT c_id, l_name, f_name, m_name, COUNT(vote_id) as votes FROM ${schema}.t_candidates
+                LEFT JOIN ${schema}.t_votes on ${schema}.t_votes.vote_id = ${schema}.t_candidates.c_id
+                GROUP BY c_id, l_name,f_name,m_name, vote_id ORDER BY COUNT(vote_id) DESC`)
                 .then((res) =>{
                     client.release();
                     return res.rows;

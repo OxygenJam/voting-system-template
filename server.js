@@ -52,7 +52,12 @@ app.use(bodyParser.json());
 
 app.get('/',(req,res)=>{
     res.sendFile(`${__dirname}/voting_site.html`);
-})
+});
+
+app.get('/tally',(req,res)=>{
+    res.sendFile(`${__dirname}/tally_site.html`);
+});
+
 
 // Modify this 
 
@@ -106,11 +111,13 @@ app.get('/get/results/', (req,res)=>{
     let { end } = voting_timespan;
 
     if(current_date >= end){
-        pp.logPrint("Retrieving results from DB...");
+        pp.logPrint("Retrieving uncovered results from DB...");
 
         votes = db.getVoteCount();
 
         votes.then((data)=>{
+            
+            // console.log(data);
 
             pp.logPrint("Sending results...");
             res.send(data);
@@ -120,8 +127,34 @@ app.get('/get/results/', (req,res)=>{
         })
     }
     else{
-        pp.errPrint("It is not yet time to reveal the results...")
-        res.send(false);
+        pp.logPrint("It is not yet time to reveal the candidates...")
+
+        votes = db.getVoteCount();
+
+        votes.then((data)=>{
+
+            // console.log(data);
+
+            pp.logPrint("Clouding results...");
+            for(var i = 0; i<data.length;i++){
+                let dummy = {
+                    c_id:-1,
+                    l_name:"????",
+                    f_name:"????",
+                    m_name:"????",
+                    votes:data[i].votes
+                }
+
+                data[i] = dummy;
+            }
+
+            pp.logPrint("Sending results...");
+            res.send(data);
+
+        })
+        .catch((err)=>{
+            pp.errPrint(err);
+        })
     }
     
 })
